@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabina Byte · Ajustar prendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0e0a15; --p1:#181221; --p2:#241b31; --tx:#f3eefb; --dim:#a89bbd; --v:#9b6bff; --ok:#5ad19a; --r:#ff5a3c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tx); font-family: Inter, 'Segoe UI', system-ui, sans-serif; }
+  body { display: grid; grid-template-columns: 340px 1fr 330px; height: 100vh; overflow: hidden; }
+  aside, section { min-height: 0; }
+  .side { background: var(--p1); padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+  h1 { font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: 26px; letter-spacing: .5px; margin: 0; }
+  h2 { font-family: Oswald, 'Arial Narrow', sans-serif; font-weight: 500; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); margin: 0; }
+  select, button { font: inherit; color: var(--tx); background: var(--p2); border: 1px solid #3a2d4d; border-radius: 10px; padding: 9px 12px; }
+  button { cursor: pointer; }
+  button:hover, select:hover { border-color: var(--v); }
+  button.prim { background: var(--v); border-color: var(--v); color: #fff; font-weight: 600; }
+  button.prim:hover { filter: brightness(1.1); }
+  button.peligro:hover { border-color: var(--r); color: var(--r); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { padding: 7px 12px; font-family: Oswald, 'Arial Narrow', sans-serif; text-transform: uppercase; font-size: 14px; }
+  .tabs button.on { background: var(--tx); color: var(--bg); border-color: var(--tx); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; padding-right: 4px; }
+  .th { position: relative; aspect-ratio: 1; background: #fff; border-radius: 10px; border: 3px solid transparent; cursor: pointer; padding: 6px; }
+  .th img { width: 100%; height: 100%; object-fit: contain; }
+  .th.on { border-color: var(--v); }
+  .th .ok { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--ok); color: #0e0a15; font-size: 14px; font-weight: 700; display: none; align-items: center; justify-content: center; }
+  .th.hecho .ok { display: flex; }
+  .centro { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 10px; }
+  #stage { flex: 1; width: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; user-select: none;
+    background: radial-gradient(circle at 50% 45%, #2a2038 0%, #120d1a 70%); border-radius: 18px; }
+  #stage.arrastrando { cursor: grabbing; }
+  #stage svg { height: 100%; max-width: 100%; }
+  .titulo { text-align: center; }
+  .titulo b { font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 22px; font-weight: 500; text-transform: uppercase; }
+  .titulo div { font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 13px; color: var(--dim); margin-top: 4px; }
+  .nav { display: flex; gap: 10px; }
+  .vals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .val { background: var(--p2); border-radius: 10px; padding: 8px 10px; }
+  .val span { display: block; font-size: 12px; color: var(--dim); }
+  .val b { font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 18px; font-weight: 500; }
+  .teclas { font-size: 13px; line-height: 1.6; color: var(--dim); }
+  .teclas kbd { font-family: 'IBM Plex Mono', Consolas, monospace; background: var(--p2); border: 1px solid #3a2d4d; border-radius: 5px; padding: 0 6px; color: var(--tx); font-size: 12px; }
+  .fila { display: flex; gap: 8px; flex-wrap: wrap; }
+  .fila > * { flex: 1; }
+  .prog { font-size: 14px; }
+  .prog b { color: var(--ok); }
+  label.chk { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+  .comp { display: flex; flex-direction: column; gap: 6px; }
+  .comp select { padding: 6px 10px; font-size: 13px; }
+  #aviso { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ok); color: #0e0a15; font-weight: 600; padding: 10px 18px; border-radius: 30px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #aviso.ver { opacity: 1; }
+  .scroll { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+</style>
+</head>
+<body>
+  <aside class="side">
+    <h1>AJUSTAR PRENDAS</h1>
+    <div class="prog" id="prog"></div>
+    <h2>Referencia</h2>
+    <select id="ref"></select>
+    <div class="tabs" id="tabs"></div>
+    <div class="grid" id="grid"></div>
+  </aside>
+
+  <section class="centro">
+    <div class="titulo"><b id="nombre"></b><div id="caption"></div></div>
+    <div id="stage" title="Arrastrá para mover · rueda del mouse para agrandar o achicar"></div>
+    <div class="nav">
+      <button id="ant">← Anterior</button>
+      <button id="sig" class="prim">Siguiente →</button>
+    </div>
+  </section>
+
+  <aside class="side scroll">
+    <h2>Esta prenda</h2>
+    <div class="vals">
+      <div class="val"><span>Horizontal</span><b id="vdx">0</b></div>
+      <div class="val"><span>Vertical</span><b id="vdy">0</b></div>
+      <div class="val"><span>Tamaño</span><b id="vs">100 %</b></div>
+      <div class="val"><span>Giro</span><b id="vr">0°</b></div>
+    </div>
+    <div class="fila">
+      <button id="espejar">↔ Espejar</button>
+      <button id="reset" class="peligro">Restablecer</button>
+    </div>
+
+    <h2>Cómo se usa</h2>
+    <div class="teclas">
+      <div><b>Mover:</b> arrastrá con el mouse, o <kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> (con <kbd>Shift</kbd>, más rápido)</div>
+      <div><b>Tamaño:</b> rueda del mouse, o <kbd>+</kbd> <kbd>−</kbd></div>
+      <div><b>Girar:</b> <kbd>Q</kbd> <kbd>E</kbd></div>
+      <div><b>Espejar:</b> <kbd>F</kbd> · <b>Restablecer:</b> <kbd>R</kbd></div>
+      <div><b>Siguiente / anterior:</b> <kbd>Enter</kbd> / <kbd>Backspace</kbd></div>
+      <div style="margin-top:6px">Todo se guarda solo mientras trabajás.</div>
+    </div>
+
+    <h2>Probar junto con</h2>
+    <div class="comp" id="comp"></div>
+    <label class="chk"><input type="checkbox" id="recorte" checked> Recortar la ropa con el cuerpo de Byte</label>
+
+    <h2>Terminar</h2>
+    <button id="exportar" class="prim">⬇ Exportar ajustes.js</button>
+    <div class="teclas">Después, reemplazá el archivo <kbd>js/ajustes.js</kbd> de la carpeta de la cabina por el que se descargó.</div>
+    <button id="borrarTodo" class="peligro">Borrar todos los ajustes</button>
+  </aside>
+
+  <div id="aviso"></div>
+
+  <script src="config.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="js/anclas.js"></script>
+  <script src="js/fotos.js"></script>
+  <script src="js/fotos_extra.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/ajustes.js"></script>
+  <script src="js/avatar.js"></script>
+  <script>
+  (function () {
+    const CATS = [["ropa", "Ropa"], ["pelo", "Pelo"], ["cabeza", "Cabeza"], ["accesorio", "Accesorios"]];
+    const LS = "cabinaAjustes";
+    const $ = (id) => document.getElementById(id);
+    const REFS = (typeof REFERENCIAS !== "undefined" ? REFERENCIAS : []).filter(r => CATS.some(([c]) => items(r, c).length));
+    let guardado = {};
+    try { guardado = JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { }
+    window.AJUSTES = Object.assign({}, window.AJUSTES || {}, guardado);
+    window.CABINA_CONFIG = window.CABINA_CONFIG || {};
+
+    let ref = REFS[0], cat = "ropa", idx = 0;
+    const companero = {};   // prendas de otras categorías para probar en conjunto
+
+    function items(r, c) { return (r && r[c] || []).filter(it => it && it.img); }
+    function lista() { return items(ref, cat); }
+    function actual() { return lista()[idx]; }
+    function esDefecto(a) { return !a || ((+a.dx || 0) === 0 && (+a.dy || 0) === 0 && (+a.s || 1) === 1 && (+a.r || 0) === 0 && a.f !== -1); }
+    function aj() {
+      const it = actual();
+      if (!window.AJUSTES[it.img]) window.AJUSTES[it.img] = { dx: 0, dy: 0, s: 1, r: 0, f: 1 };
+      return window.AJUSTES[it.img];
+    }
+    function limpio() {
+      const o = {};
+      for (const [k, a] of Object.entries(window.AJUSTES)) if (!esDefecto(a)) o[k] = { dx: Math.round(a.dx || 0), dy: Math.round(a.dy || 0), s: +(+a.s || 1).toFixed(3), r: +(+a.r || 0).toFixed(1), f: a.f === -1 ? -1 : 1 };
+      return o;
+    }
+    let tGuardar = null;
+    function guardar() {
+      clearTimeout(tGuardar);
+      tGuardar = setTimeout(() => { try { localStorage.setItem(LS, JSON.stringify(limpio())); } catch (e) { } }, 250);
+    }
+    function aviso(t) { const a = $("aviso"); a.textContent = t; a.classList.add("ver"); clearTimeout(a._t); a._t = setTimeout(() => a.classList.remove("ver"), 2200); }
+
+    /* ---------- armado de la interfaz ---------- */
+    $("ref").innerHTML = REFS.map((r, i) => `<option value="${i}">${r.titulo}</option>`).join("");
+    $("ref").onchange = () => { ref = REFS[+$("ref").value]; idx = 0; for (const k in companero) delete companero[k]; if (!lista().length) cat = CATS.find(([c]) => items(ref, c).length)[0]; todo(); };
+
+    function tabs() {
+      $("tabs").innerHTML = CATS.filter(([c]) => items(ref, c).length).map(([c, n]) => `<button data-c="${c}" class="${c === cat ? "on" : ""}">${n} (${items(ref, c).length})</button>`).join("");
+      $("tabs").querySelectorAll("button").forEach(b => b.onclick = () => { cat = b.dataset.c; idx = 0; delete companero[cat]; todo(); });
+    }
+    function grid() {
+      $("grid").innerHTML = lista().map((it, i) => `<div class="th ${i === idx ? "on" : ""} ${esDefecto(window.AJUSTES[it.img]) ? "" : "hecho"}" data-i="${i}" title="${it.nombre}"><img src="${BeatArt.assetURL(it.img)}" alt=""><span class="ok">✓</span></div>`).join("");
+      $("grid").querySelectorAll(".th").forEach(d => d.onclick = () => { idx = +d.dataset.i; todo(); });
+      const on = $("grid").querySelector(".th.on"); if (on) on.scrollIntoView({ block: "nearest" });
+    }
+    function comp() {
+      $("comp").innerHTML = CATS.filter(([c]) => c !== cat && items(ref, c).length).map(([c, n]) =>
+        `<select data-c="${c}"><option value="">${n}: ninguna</option>${items(ref, c).map((it, i) => `<option value="${i}" ${companero[c] === i ? "selected" : ""}>${n}: ${it.nombre}</option>`).join("")}</select>`).join("");
+      $("comp").querySelectorAll("select").forEach(s => s.onchange = () => { if (s.value === "") delete companero[s.dataset.c]; else companero[s.dataset.c] = +s.value; dibujar(); });
+    }
+    function progreso() {
+      let tot = 0, ok = 0;
+      for (const r of REFS) for (const [c] of CATS) for (const it of items(r, c)) { tot++; if (!esDefecto(window.AJUSTES[it.img])) ok++; }
+      $("prog").innerHTML = `<b>${ok}</b> de ${tot} prendas ajustadas`;
+    }
+    function valores() {
+      const a = window.AJUSTES[actual().img] || {};
+      $("vdx").textContent = Math.round(a.dx || 0);
+      $("vdy").textContent = Math.round(a.dy || 0);
+      $("vs").textContent = Math.round((a.s || 1) * 100) + " %";
+      $("vr").textContent = (+(a.r || 0)).toFixed(0) + "°";
+    }
+    let pend = false;
+    function dibujar() {
+      if (pend) return; pend = true;
+      requestAnimationFrame(() => {
+        pend = false;
+        const it = actual(); if (!it) { $("stage").innerHTML = ""; return; }
+        const sel = { [cat]: it };
+        for (const [c, i] of Object.entries(companero)) { const x = items(ref, c)[i]; if (x) sel[c] = x; }
+        $("stage").innerHTML = BeatArt.avatarSVG(sel);
+        $("nombre").textContent = it.nombre || it.img;
+        $("caption").textContent = it.img;
+        valores();
+      });
+    }
+    function todo() { tabs(); grid(); comp(); progreso(); dibujar(); }
+
+    function cambio() { guardar(); dibujar(); progreso(); const th = $("grid").querySelector(`.th[data-i="${idx}"]`); if (th) th.classList.toggle("hecho", !esDefecto(window.AJUSTES[actual().img])); }
+    function mover(dx, dy) { const a = aj(); a.dx = (a.dx || 0) + dx; a.dy = (a.dy || 0) + dy; cambio(); }
+    function escalar(f) { const a = aj(); a.s = Math.max(0.2, Math.min(4, (a.s || 1) * f)); cambio(); }
+    function girar(g) { const a = aj(); a.r = (a.r || 0) + g; cambio(); }
+    function espejar() { const a = aj(); a.f = a.f === -1 ? 1 : -1; cambio(); }
+    function restablecer() { delete window.AJUSTES[actual().img]; cambio(); }
+    function paso(d) {
+      const n = lista().length;
+      if (idx + d >= 0 && idx + d < n) { idx += d; grid(); dibujar(); return; }
+      // al terminar una categoría pasa a la siguiente (y a la siguiente referencia)
+      const cs = CATS.map(([c]) => c).filter(c => items(ref, c).length), ci = cs.indexOf(cat);
+      if (d > 0 && ci < cs.length - 1) { cat = cs[ci + 1]; idx = 0; }
+      else if (d < 0 && ci > 0) { cat = cs[ci - 1]; idx = lista().length - 1; }
+      else {
+        const ri = REFS.indexOf(ref) + d;
+        if (ri < 0 || ri >= REFS.length) { aviso(d > 0 ? "¡Llegaste a la última prenda!" : "Es la primera prenda"); return; }
+        ref = REFS[ri]; $("ref").value = ri;
+        const cs2 = CATS.map(([c]) => c).filter(c => items(ref, c).length);
+        cat = d > 0 ? cs2[0] : cs2[cs2.length - 1]; idx = d > 0 ? 0 : lista().length - 1;
+      }
+      for (const k in companero) delete companero[k];
+      todo();
+    }
+
+    /* ---------- mouse: arrastrar y rueda ---------- */
+    const st = $("stage");
+    function aSVG(e) {
+      const svg = st.querySelector("svg"); if (!svg) return null;
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+    let drag = null;
+    st.addEventListener("pointerdown", e => { const p = aSVG(e); if (!p) return; drag = p; st.setPointerCapture(e.pointerId); st.classList.add("arrastrando"); });
+    st.addEventListener("pointermove", e => { if (!drag) return; const p = aSVG(e); if (!p) return; mover(p.x - drag.x, p.y - drag.y); drag = p; });
+    const soltar = () => { drag = null; st.classList.remove("arrastrando"); };
+    st.addEventListener("pointerup", soltar); st.addEventListener("pointercancel", soltar);
+    st.addEventListener("wheel", e => { e.preventDefault(); escalar(e.deltaY < 0 ? 1.03 : 1 / 1.03); }, { passive: false });
+
+    /* ---------- teclado ---------- */
+    document.addEventListener("keydown", e => {
+      if (e.target.tagName === "SELECT") return;
+      const k = e.key, m = e.shiftKey ? 10 : 2;
+      if (k === "ArrowLeft") mover(-m, 0);
+      else if (k === "ArrowRight") mover(m, 0);
+      else if (k === "ArrowUp") mover(0, -m);
+      else if (k === "ArrowDown") mover(0, m);
+      else if (k === "+" || k === "=") escalar(e.shiftKey ? 1.1 : 1.02);
+      else if (k === "-" || k === "_") escalar(e.shiftKey ? 1 / 1.1 : 1 / 1.02);
+      else if (k === "q" || k === "Q") girar(e.shiftKey ? -5 : -1);
+      else if (k === "e" || k === "E") girar(e.shiftKey ? 5 : 1);
+      else if (k === "f" || k === "F") espejar();
+      else if (k === "r" || k === "R") restablecer();
+      else if (k === "Enter") paso(1);
+      else if (k === "Backspace") paso(-1);
+      else return;
+      e.preventDefault();
+    });
+
+    /* ---------- botones ---------- */
+    $("sig").onclick = () => paso(1);
+    $("ant").onclick = () => paso(-1);
+    $("espejar").onclick = espejar;
+    $("reset").onclick = restablecer;
+    $("recorte").onchange = () => { window.CABINA_CONFIG.recortarRopaAlCuerpo = $("recorte").checked; dibujar(); };
+    $("borrarTodo").onclick = () => {
+      if (!confirm("¿Borrar los ajustes de TODAS las prendas? No se puede deshacer.")) return;
+      window.AJUSTES = {}; try { localStorage.removeItem(LS); } catch (e) { } todo(); aviso("Ajustes borrados");
+    };
+    $("exportar").onclick = () => {
+      const datos = limpio();
+      const txt = `/* Ajustes finos de cada prenda sobre Byte (mover, escalar, girar, espejar).
+   Generado con ajustar_prendas.html el ${new Date().toLocaleString("es-AR")} · ${Object.keys(datos).length} prendas ajustadas.
+   Para aplicarlos: reemplacen js/ajustes.js por este archivo. */
+window.AJUSTES = ${JSON.stringify(datos, null, 1)};
+`;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([txt], { type: "text/javascript" }));
+      a.download = "ajustes.js";
+      document.body.appendChild(a); a.click(); a.remove();
+      aviso("Se descargó ajustes.js");
+    };
+
+    if (!REFS.length) { $("stage").textContent = "No se encontraron prendas con foto."; return; }
+    todo();
+  })();
+  </script>
+</body>
+</html>

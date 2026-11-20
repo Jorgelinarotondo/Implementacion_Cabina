@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cabina Byte · ¿La IA crea o recombina?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <!-- Escenario fijo de 1920×1080 que se escala para entrar en cualquier pantalla -->
+  <div id="stage" class="s-attract">
+    <div class="grain"></div><div class="perfs"></div>
+    <div id="attract"></div>
+
+    <header id="top">
+      <div class="brand">
+        <svg class="aperture" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="3"/><g fill="none" stroke="currentColor" stroke-width="2.4"><path d="M24 3 L33 20"/><path d="M42 14 L30 28"/><path d="M41 36 L22 33"/><path d="M24 45 L15 28"/><path d="M6 34 L18 20"/><path d="M7 12 L26 15"/></g></svg>
+        <div>
+          <div class="brand-name">CABINA BYTE</div>
+          <div class="brand-sub">¿La IA crea o recombina?</div>
+        </div>
+      </div>
+      <nav id="nucleos">
+        <div class="nuc" data-n="1"><b>01</b><span>¿De qué aprende la IA?</span></div>
+        <div class="nuc" data-n="2"><b>02</b><span>¿Cómo se construye una imagen?</span></div>
+        <div class="nuc" data-n="3"><b>03</b><span>¿Crea, recombina o copia?</span></div>
+      </nav>
+      <div id="barra" title="Espejo de la barra de ajustes física">
+        <div class="barra-rail"></div>
+        <div class="barra-stop" data-p="1"><i></i><span></span></div>
+        <div class="barra-stop" data-p="2"><i></i><span></span></div>
+        <div class="barra-stop" data-p="3"><i></i><span></span></div>
+        <div class="barra-stop" data-p="4"><i></i><span></span></div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="left" class="panel"></section>
+      <section id="view">
+        <div id="viewInner"></div>
+        <div class="vf-corner tl"></div><div class="vf-corner tr"></div><div class="vf-corner bl"></div><div class="vf-corner br"></div>
+        <div id="vfLabel"></div>
+      </section>
+      <section id="right" class="panel"></section>
+    </main>
+
+    <footer id="reel">
+      <div class="sprockets top"></div>
+      <div id="reelTrack"></div>
+      <div id="reelMsg"></div>
+      <div class="sprockets bottom"></div>
+      <div id="reelHint"></div>
+      <div id="tut"></div>
+    </footer>
+
+    <div id="overlay"></div>
+    <div id="toast"></div>
+    <div id="flash"></div>
+    <div id="labChip"></div>
+
+    <!-- Panel de prueba (tecla D): simula los controles físicos con el mouse -->
+    <div id="debug">
+      <b>Controles (prueba)</b>
+      <div class="dbg-row">Barra: <button data-k="1">1 ●</button><button data-k="2">2 🎬</button><button data-k="3">3 👕</button><button data-k="4">4 🖼</button></div>
+      <div class="dbg-row">Perilla: <button data-k="ArrowLeft">⟲</button><button data-k="ArrowRight">⟳</button></div>
+      <div class="dbg-row"><button data-k="Enter" class="big">● Confirmar</button></div>
+      <small>Teclado: 1-4 barra · ←/→ o rueda del mouse = perilla · Enter/Espacio = botón · R reiniciar · F pantalla completa · D este panel</small>
+    </div>
+  </div>
+
+  <!-- Hoja para imprimir (10×15 cm) -->
+  <div id="printSheet"><img id="printImg" alt=""></div>
+
+  <video id="cam" autoplay playsinline muted></video>
+
+  <script src="config.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="js/anclas.js"></script>
+  <script src="js/media.js"></script>
+  <script src="js/fotos.js"></script>
+  <script src="js/fotos_extra.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/ajustes.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/controles.js"></script>
+  <script src="js/generador.js"></script>
+  <script src="js/qrcode.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
